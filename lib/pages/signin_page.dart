@@ -26,27 +26,31 @@ class _SignInPageState extends State<SignInPage> {
     setState(() {
       isLoading = true;
     });
-    AuthService.signInUser(context, email, password).then((firebaseUser) => {
-      _getFirebaseUser(firebaseUser!),
+    AuthService.signInUser(context, email, password).then((value) => {
+      _getFirebaseUser(value),
     });
   }
 
-  _getFirebaseUser(FirebaseUser firebaseUser) async {
+  _getFirebaseUser(Map<String, FirebaseUser> map) async {
     setState(() {
       isLoading = false;
     });
-    if (firebaseUser != null) {
-      await Prefs.saveUserId(firebaseUser.uid);
-      Navigator.pushReplacementNamed(context, HomPage.id);
-    } else {
-      Utils.fireToast("Check your email or password");
+    FirebaseUser? firebaseUser;
+    if (!map.containsKey("SUCCES")) {
+      if (map.containsKey("ERROR"))
+        Utils.fireToast("Check your email or password");
+      return;
     }
-  }
+     firebaseUser =map["SUCCES"];
+      if(firebaseUser==null) return;
+      await Prefs.saveUserId(firebaseUser.uid);
+      Navigator.pushReplacementNamed(context,HomPage.id);
+    }
+
 
   _callSiginUpPage(){
     Navigator.pushReplacementNamed(context,SignUpPage.id);
   }
-
 
   @override
   Widget build(BuildContext context) {
