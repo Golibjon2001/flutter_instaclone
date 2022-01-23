@@ -2,6 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_instaclone/post/post_image.dart';
+import 'package:flutter_instaclone/servise/auth_servise.dart';
+import 'package:flutter_instaclone/servise/data_servise.dart';
+import 'package:flutter_instaclone/servise/utilis_servise.dart';
 class MyfeedPage extends StatefulWidget {
   PageController? pageController;
   MyfeedPage({this.pageController});
@@ -11,19 +14,61 @@ class MyfeedPage extends StatefulWidget {
 
 class _MyfeedPageState extends State<MyfeedPage> {
 
-
-
   List<Post> itms=[];
 
-  String post_img1='https://firebasestorage.googleapis.com/v0/b/fire-post-d2cb9.appspot.com/o/post_images%2Fimage_2022-01-09%2008%3A05%3A38.932848?alt=media&token=422c6751-a71b-4099-b2f3-55';
-  String post_img2='https://firebasestorage.googleapis.com/v0/b/fire-post-d2cb9.appspot.com/o/post_images%2Fimage_2022-01-09%2008%3A07%3A21.954007?alt=media&token=abbf240f-1430-401e-a737-9a922414b2b4';
+  bool isLoading=true;
+
+  void _apiLoadFeds(){
+    DataServise.loadFeeds().then((value) => {
+      _resLoadFeeds(value),
+    });
+  }
+
+  void _resLoadFeeds(List<Post>posts){
+    setState(() {
+      itms=posts;
+    });
+  }
+
+  void _apiPostLike(Post post) async {
+    setState(() {
+      isLoading = true;
+    });
+    await DataServise.likePost(post, true);
+    setState(() {
+      isLoading = false;
+      post.liked = true;
+    });
+  }
+
+  void _apiPostUnLike(Post post) async {
+    setState(() {
+      isLoading = true;
+    });
+    await DataServise.likePost(post, false);
+    setState(() {
+      isLoading = false;
+      post.liked = false;
+    });
+  }
+
+  _actionRemovePosts(Post post)async{
+    var result=await Utils.dialogCommon(context, "Insta Clone", "Do you  want to remove this post?", false);
+    if(result!=null&&result){
+      setState(() {
+        isLoading=true;
+      });
+      DataServise.removePost(post).then((value) =>{
+        _apiLoadFeds(),
+      });
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    itms.add(Post(postImage:post_img1,caption:"Discover more great images on our sponsor's site"));
-    itms.add(Post(postImage:post_img2,caption:"Discover more great images on our sponsor's site"));
+    _apiLoadFeds();
   }
   @override
   Widget build(BuildContext context) {
@@ -39,7 +84,7 @@ class _MyfeedPageState extends State<MyfeedPage> {
               onPressed: (){
                 widget.pageController!.animateToPage(2,duration:Duration(milliseconds:200),curve:Curves.easeIn);
               },
-              icon:const Icon(Icons.camera_alt,color:Colors.black,),
+              icon:const Icon(Icons.camera_alt,color: Color.fromRGBO(193, 53, 132,1),),
           ),
         ],
       ),
@@ -59,7 +104,7 @@ class _MyfeedPageState extends State<MyfeedPage> {
           Divider(),
           //*userInfo
           Container(
-            padding:EdgeInsets.symmetric(horizontal:10,vertical:10),
+            padding:const EdgeInsets.symmetric(horizontal:10,vertical:10),
             child:Row(
               mainAxisAlignment:MainAxisAlignment.spaceBetween,
               children: [
@@ -67,36 +112,41 @@ class _MyfeedPageState extends State<MyfeedPage> {
                   children: [
                     ClipRRect(
                       borderRadius:BorderRadius.circular(40),
-                      child:const Image(
+                      child:(post.img_user==null||post.img_user.isEmpty)? const Image(
                         image:AssetImage('assets/images/instagram-user.png'),
                         width:40,
                         height:40,
                         fit:BoxFit.cover,
-                      ),
+                      ):Image.network(post.img_user,width:40,height:40,fit:BoxFit.cover,)
                     ),
                     const SizedBox(width:10,),
                     Column(
                       crossAxisAlignment:CrossAxisAlignment.start,
-                      children: const [
-                        Text("Username",style:TextStyle(color:Colors.black,fontWeight:FontWeight.bold),),
-                        Text("February 2, 2020",style:TextStyle(color:Colors.black,fontWeight:FontWeight.normal),),
+                      children:  [
+                        Text(post.fullname,style:const TextStyle(color:Colors.black,fontWeight:FontWeight.bold),),
+                        Text(post.date,style:const TextStyle(color:Colors.black,fontWeight:FontWeight.normal),),
                       ],
                     ),
                   ],
-                ),
+                ),post.mine?
                 IconButton(
-                    onPressed:(){},
-                    icon:const Icon(SimpleLineIcons.options),
-                ),
+                    onPressed:(){
+                    _actionRemovePosts(post);
+                    },
+                    icon: const Icon(SimpleLineIcons.options),
+                ):const SizedBox.shrink(),
               ],
             ),
           ),
           //*image
           //Image.network(post.postImage,fit:BoxFit.cover,),
           CachedNetworkImage(
-            imageUrl:post.postImage,
-            placeholder: (context, url) => CircularProgressIndicator(),
-            errorWidget: (context, url, error) => Icon(Icons.error),
+            width:MediaQuery.of(context).size.width,
+            height:MediaQuery.of(context).size.width,
+            imageUrl:post.img_post,
+            placeholder: (context, url) => const Center(child:CircularProgressIndicator(),),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
+            fit:BoxFit.cover,
           ),
           //*likeshere
           Row(
@@ -105,12 +155,20 @@ class _MyfeedPageState extends State<MyfeedPage> {
               Row(
                 children: [
                   IconButton(
-                      onPressed:(){},
-                      icon:Icon(FontAwesome.heart_o),
+                      onPressed:(){
+                        if(!post.liked){
+                          _apiPostLike(post);
+                        }else{
+                          _apiPostUnLike(post);
+                        }
+                      },
+                      icon:post.liked?
+                      const Icon(FontAwesome.heart,color:Colors.red,)
+                          :const Icon(FontAwesome.heart_o),
                   ),
                   IconButton(
                       onPressed:(){},
-                      icon:Icon(FontAwesome.send),
+                      icon:const Icon(Icons.share),
                   )
                 ],
               ),
@@ -119,7 +177,7 @@ class _MyfeedPageState extends State<MyfeedPage> {
 
           Container(
             width:MediaQuery.of(context).size.width,
-            margin:EdgeInsets.only(left:10,right:10,bottom:10),
+            margin:const EdgeInsets.only(left:10,right:10,bottom:10),
             child:RichText(
               softWrap:true,
               overflow:TextOverflow.visible,

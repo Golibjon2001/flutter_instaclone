@@ -1,13 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_instaclone/pages/hom_page.dart';
 import 'package:flutter_instaclone/pages/signin_page.dart';
 import 'package:flutter_instaclone/pages/signup_page.dart';
 import 'package:flutter_instaclone/pages/splesh_page.dart';
 import 'package:flutter_instaclone/servise/prefs_servise.dart';
 
-void main() {
-  runApp( MyApp());
+
+Future<void> main()async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {

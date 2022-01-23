@@ -7,6 +7,7 @@ import 'package:flutter_instaclone/post/user_post.dart';
 import 'package:flutter_instaclone/servise/auth_servise.dart';
 import 'package:flutter_instaclone/servise/data_servise.dart';
 import 'package:flutter_instaclone/servise/file_servise.dart';
+import 'package:flutter_instaclone/servise/utilis_servise.dart';
 import 'package:image_picker/image_picker.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -19,12 +20,9 @@ class _ProfilePageState extends State<ProfilePage> {
   bool isLoading=false;
   var axsis=1;
   List<Post> itms=[];
-
-  String post_img1='https://firebasestorage.googleapis.com/v0/b/fire-post-d2cb9.appspot.com/o/post_images%2Fimage_2022-01-09%2008%3A05%3A38.932848?alt=media&token=422c6751-a71b-4099-b2f3-55';
-  String post_img2='https://firebasestorage.googleapis.com/v0/b/fire-post-d2cb9.appspot.com/o/post_images%2Fimage_2022-01-09%2008%3A07%3A21.954007?alt=media&token=abbf240f-1430-401e-a737-9a922414b2b4';
   File? _image;
-
   String fullname="",email="",img_url="";
+  int count_posts=0,count_followers=0,count_following=0;
 
   _imgFromGallery() async  {
     File image = await  ImagePicker.pickImage(
@@ -70,7 +68,41 @@ class _ProfilePageState extends State<ProfilePage> {
     this.fullname=user.fullname;
     this.email=user.email;
     this.img_url=user.img_url;
+    this.count_followers=user.follovers_count;
+    this.count_following=user.following_count;
     });
+  }
+
+  void _apiLoadPost(){
+   DataServise.loadPosts().then((value) =>{
+     _resLoadPosts(value),
+   });
+  }
+
+  void  _resLoadPosts(List<Post>posts){
+    setState(() {
+      itms=posts;
+      count_posts=itms.length;
+    });
+  }
+
+  void _actionLogaut()async{
+    var result=await Utils.dialogCommon(context, "Insta Clone", "Do you  want to logout?", false);
+    if(result!=null&&result){
+      AuthService.signOutUser(context);
+    }
+  }
+
+  _actionRemovePosts(Post post)async{
+    var result=await Utils.dialogCommon(context, "Insta Clone", "Do you  want to remove this post?", false);
+    if(result!=null&&result){
+      setState(() {
+        isLoading=true;
+      });
+      DataServise.removePost(post).then((value) =>{
+        _apiLoadPost(),
+      });
+    }
   }
 
 
@@ -79,8 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    itms.add(Post(postImage:post_img1,caption:"Discover more great images on our sponsor's site"));
-    itms.add(Post(postImage:post_img2,caption:"Discover more great images on our sponsor's site"));
+    _apiLoadPost();
     _apiLoadUser();
   }
   @override
@@ -95,10 +126,11 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           IconButton(
               onPressed:(){
-                AuthService.signOutUser(context);
+                _actionLogaut();
+
               },
-              icon:Icon(Icons.exit_to_app),
-            color:Colors.black87,
+              icon:const Icon(Icons.exit_to_app),
+            color: const Color.fromRGBO(193, 53, 132,1),
           ),
         ],
       ),
@@ -106,17 +138,17 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           Container(
             width:double.infinity,
-            padding:EdgeInsets.all(10),
+            padding:const EdgeInsets.all(10),
             child:Column(
               children:  [
                 //#myphoto
                 Stack(
                   children: [
                     Container(
-                      padding:EdgeInsets.all(2),
+                      padding:const EdgeInsets.all(2),
                       decoration:BoxDecoration(
                           borderRadius:BorderRadius.circular(70),
-                          border:Border.all(width:1,color:Color.fromRGBO(193, 53, 132,1),)
+                          border:Border.all(width:1,color:const Color.fromRGBO(193, 53, 132,1),)
                       ),
                       child:ClipRRect(
                         borderRadius:BorderRadius.circular(70),
@@ -167,10 +199,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         child:Center(
                           child:Column(
                             mainAxisAlignment:MainAxisAlignment.center,
-                            children: const [
-                              Text("675",style:TextStyle(color:Colors.black,fontSize:16,fontWeight:FontWeight.bold),),
-                              SizedBox(height:3,),
-                              Text("POST",style:TextStyle(color:Colors.grey,fontSize:14,fontWeight:FontWeight.normal),),
+                            children: [
+                              Text(count_posts.toString(),style:const TextStyle(color:Colors.black,fontSize:16,fontWeight:FontWeight.bold),),
+                              const SizedBox(height:3,),
+                              const Text("POST",style:TextStyle(color:Colors.grey,fontSize:14,fontWeight:FontWeight.normal),),
                             ],
                           ),
                         ),
@@ -180,10 +212,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         child:Center(
                           child:Column(
                             mainAxisAlignment:MainAxisAlignment.center,
-                            children: const [
-                              Text("675",style:TextStyle(color:Colors.black,fontSize:16,fontWeight:FontWeight.bold),),
-                              SizedBox(height:3,),
-                              Text("FOLLOWERS",style:TextStyle(color:Colors.grey,fontSize:14,fontWeight:FontWeight.normal),),
+                            children: [
+                              Text(count_followers.toString(),style:const TextStyle(color:Colors.black,fontSize:16,fontWeight:FontWeight.bold),),
+                              const SizedBox(height:3,),
+                              const Text("FOLLOWERS",style:TextStyle(color:Colors.grey,fontSize:14,fontWeight:FontWeight.normal),),
                             ],
                           ),
                         ),
@@ -193,10 +225,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         child:Center(
                           child:Column(
                             mainAxisAlignment:MainAxisAlignment.center,
-                            children: const [
-                              Text("675",style:TextStyle(color:Colors.black,fontSize:16,fontWeight:FontWeight.bold),),
-                              SizedBox(height:3,),
-                              Text("FOLLOWING",style:TextStyle(color:Colors.grey,fontSize:14,fontWeight:FontWeight.normal),),
+                            children:  [
+                              Text(count_following.toString(),style:const TextStyle(color:Colors.black,fontSize:16,fontWeight:FontWeight.bold),),
+                              const SizedBox(height:3,),
+                              const Text("FOLLOWING",style:TextStyle(color:Colors.grey,fontSize:14,fontWeight:FontWeight.normal),),
                             ],
                           ),
                         ),
@@ -206,7 +238,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Container(
                   height:40,
-                  padding:EdgeInsets.all(10),
+                  padding:const EdgeInsets.all(10),
                   child:Row(
                     children: [
                       Expanded(
@@ -216,7 +248,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               axsis=1;
                             });
                           },
-                          icon:Icon(Icons.list_alt),
+                          icon:const Icon(Icons.list_alt),
                         ),
                       ),
                       Expanded(
@@ -226,7 +258,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               axsis=2;
                             });
                           },
-                          icon:Icon(Icons.grid_view),
+                          icon:const Icon(Icons.grid_view),
                         ),
                       ),
                     ],
@@ -247,26 +279,33 @@ class _ProfilePageState extends State<ProfilePage> {
           isLoading ?
           const Center(
             child: CircularProgressIndicator(),
-          ): SizedBox.shrink(),
+          ): const SizedBox.shrink(),
         ],
       ),
     );
   }
   Widget _itmOfPost(Post post){
-    return Container(
-      margin:EdgeInsets.all(5),
-      child:Column(
-        children: [
-          Expanded(
-            child:CachedNetworkImage(
-              imageUrl:post.postImage,
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => Icon(Icons.error),
+    return GestureDetector(
+      onLongPress:(){
+        _actionRemovePosts(post);
+      },
+      child:Container(
+        margin:const EdgeInsets.all(5),
+        child:Column(
+          children: [
+            Expanded(
+              child:CachedNetworkImage(
+                width:double.infinity,
+                imageUrl:post.img_post,
+                placeholder: (context, url) => const Center(child:CircularProgressIndicator()),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+                fit:BoxFit.cover,
+              ),
             ),
-          ),
-          SizedBox(height:3,),
-          Text(post.caption,style:TextStyle(color:Colors.black87.withOpacity(0.7)),maxLines:2,),
-        ],
+            const SizedBox(height:3,),
+            Text(post.caption,style:TextStyle(color:Colors.black87.withOpacity(0.7)),maxLines:2,),
+          ],
+        ),
       ),
     );
   }

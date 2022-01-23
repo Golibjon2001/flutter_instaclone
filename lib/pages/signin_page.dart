@@ -57,7 +57,7 @@ class _SignInPageState extends State<SignInPage> {
     return Scaffold(
       body:SingleChildScrollView(
         child: Container(
-          padding:EdgeInsets.all(20),
+          padding:const EdgeInsets.all(20),
           height:MediaQuery.of(context).size.height,
           decoration:const BoxDecoration(
             gradient:LinearGradient(
@@ -78,12 +78,12 @@ class _SignInPageState extends State<SignInPage> {
                     child:Column(
                       mainAxisAlignment:MainAxisAlignment.center,
                       children: [
-                        Text("Instagram",style:TextStyle(color:Colors.white,fontSize:45,fontFamily:'Billabong'),),
-                        SizedBox(height:20,),
+                        const Text("Instagram",style:TextStyle(color:Colors.white,fontSize:45,fontFamily:'Billabong'),),
+                        const SizedBox(height:20,),
                         //#email
                         Container(
                           height:50,
-                          padding:EdgeInsets.only(right:10,left:10),
+                          padding:const EdgeInsets.only(right:10,left:10),
                           decoration:BoxDecoration(
                             color:Colors.white54.withOpacity(0.2),
                             borderRadius:BorderRadius.circular(7),
@@ -98,11 +98,11 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height:10,),
+                        const SizedBox(height:10,),
                         //#password
                         Container(
                           height:50,
-                          padding:EdgeInsets.only(right:10,left:10),
+                          padding:const EdgeInsets.only(right:10,left:10),
                           decoration:BoxDecoration(
                             color:Colors.white54.withOpacity(0.2),
                             borderRadius:BorderRadius.circular(7),
@@ -118,7 +118,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height:10,),
+                        const SizedBox(height:10,),
                         //#signin
                         GestureDetector(
                           onTap:(){
@@ -126,7 +126,7 @@ class _SignInPageState extends State<SignInPage> {
                           },
                           child:Container(
                             height:50,
-                            padding:EdgeInsets.only(left:10,right: 10),
+                            padding:const EdgeInsets.only(left:10,right: 10),
                             decoration:BoxDecoration(
                               border:Border.all(color:Colors.white54.withOpacity(0.2),width:2),
                               borderRadius:BorderRadius.circular(7),
@@ -160,7 +160,7 @@ class _SignInPageState extends State<SignInPage> {
               isLoading ?
               const Center(
                 child: CircularProgressIndicator(),
-              ): SizedBox.shrink(),
+              ): const SizedBox.shrink(),
             ],
           ),
         ),

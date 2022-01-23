@@ -5,6 +5,10 @@ class User{
   String password;
   String email;
 
+  String? device_id="";
+  String? device_type="";
+  String? device_token="";
+
   bool follwed=false;
   int follovers_count=0;
   int following_count=0;
@@ -16,7 +20,10 @@ class User{
   fullname=json['fullname'],
   img_url=json['img_url'],
   password=json['password'],
-  email=json['email'];
+  email=json['email'],
+  device_id=json['device_id'],
+  device_type=json['device_type'],
+  device_token=json['device_token'];
 
   Map<String,dynamic> toJson()=>{
   'uid':uid,
@@ -24,6 +31,9 @@ class User{
   'img_url':img_url,
   'password':password,
   'email':email,
+  'device_id':device_id,
+  'device_type':device_type,
+  'device_token':device_token,
   };
 
   @override

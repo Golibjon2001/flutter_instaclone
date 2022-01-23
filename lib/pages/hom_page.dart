@@ -1,5 +1,7 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_instaclone/servise/utilis_servise.dart';
 import 'my_feed_page.dart';
 import 'my_likes_page.dart';
 import 'my_profile_page.dart';
@@ -14,8 +16,11 @@ class HomPage extends StatefulWidget {
 }
 
 class _HomPageState extends State<HomPage> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
   PageController? _pageController;
   int _currenTab=0;
+  
 
 
   @override
@@ -23,6 +28,7 @@ class _HomPageState extends State<HomPage> {
     // TODO: implement initState
     super.initState();
     _pageController=PageController();
+    _initNotification();
   }
 
   @override
@@ -32,10 +38,10 @@ class _HomPageState extends State<HomPage> {
         controller:_pageController,
         children:[
           MyfeedPage(pageController:_pageController),
-          SearchPage(),
+          const SearchPage(),
           UploadPage(pageController:_pageController),
-          LikesPage(),
-          ProfilePage(),
+          const LikesPage(),
+          const ProfilePage(),
         ],
         onPageChanged:(int index){
           setState(() {

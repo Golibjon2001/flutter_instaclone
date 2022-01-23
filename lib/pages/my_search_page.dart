@@ -30,12 +30,40 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
+  void _apiFollowUser(User someone) async{
+    setState(() {
+      isLoading = true;
+    });
+    await DataServise.followUser(someone);
+    setState(() {
+      someone.follwed = true;
+      isLoading = false;
+    });
+    DataServise.storePostsToMyFeed(someone);
+  }
+
+  void _apiUnfollowUser(User someone) async{
+    setState(() {
+      isLoading = true;
+    });
+    await DataServise.unfollowUser(someone);
+    setState(() {
+      someone.follwed = false;
+      isLoading = false;
+    });
+    DataServise.removePostsFromMyFeed(someone);
+  }
+
+
+
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _apiSearchUser("");
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +77,7 @@ class _SearchPageState extends State<SearchPage> {
       body:Stack(
         children: [
           Container(
-            padding:EdgeInsets.only(left:20,right:20),
+            padding:const EdgeInsets.only(left:20,right:20),
             child:Column(
               children: [
                 //#searchuser
@@ -63,7 +91,7 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                   child: TextField(
                     controller:searccontroler,
-                    style:TextStyle(color:Colors.black87),
+                    style:const TextStyle(color:Colors.black87),
                     onChanged:(input){
                       print(input);
                       _apiSearchUser(input);
@@ -90,7 +118,7 @@ class _SearchPageState extends State<SearchPage> {
           isLoading ?
           const Center(
             child: CircularProgressIndicator(),
-          ): SizedBox.shrink(),
+          ): const SizedBox.shrink(),
         ],
       ),
     );
@@ -102,10 +130,10 @@ class _SearchPageState extends State<SearchPage> {
         children: [
           //#userImage
           Container(
-            padding:EdgeInsets.all(2),
+            padding:const EdgeInsets.all(2),
             decoration:BoxDecoration(
               borderRadius:BorderRadius.circular(70),
-              border:Border.all(width:1.5,color:Color.fromRGBO(193, 53, 132,1),),
+              border:Border.all(width:1.5,color:const Color.fromRGBO(193, 53, 132,1),),
             ),
             child:ClipRRect(
               borderRadius:BorderRadius.circular(22.5),
@@ -124,28 +152,38 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
           ),
-          SizedBox(width:15,),
+          const SizedBox(width:15,),
           Column(
             mainAxisAlignment:MainAxisAlignment.center,
             crossAxisAlignment:CrossAxisAlignment.start,
             children: [
-              Text(user.fullname,style:TextStyle(fontWeight:FontWeight.bold),),
-              Text(user.email,style:TextStyle(color:Colors.black87),),
+              Text(user.fullname,style:const TextStyle(fontWeight:FontWeight.bold),),
+              Text(user.email,style:const TextStyle(color:Colors.black87),),
             ],
           ),
           Expanded(
               child:Row(
                 mainAxisAlignment:MainAxisAlignment.end,
                 children: [
-                  Container(
-                    height:30,
-                    width:100,
-                    decoration:BoxDecoration(
-                      borderRadius:BorderRadius.circular(3),
-                      border:Border.all(width:1,color:Colors.grey),
-                    ),
-                    child:const Center(
-                      child:Text("Follow"),
+                  GestureDetector(
+                    onTap:(){
+                       if(user.follwed){
+                         _apiUnfollowUser(user);
+                       }else{
+                         _apiFollowUser(user);
+                       }
+                    },
+                    child:Container(
+                      height:30,
+                      width:100,
+                      decoration:BoxDecoration(
+                        borderRadius:BorderRadius.circular(3),
+                        border:Border.all(width:1,color:Colors.grey
+                        ),
+                      ),
+                      child: Center(
+                        child:user.follwed ? const Text("Following"):const Text("Follow"),
+                      ),
                     ),
                   ),
                 ],

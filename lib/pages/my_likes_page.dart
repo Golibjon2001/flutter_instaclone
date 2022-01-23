@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_instaclone/post/post_image.dart';
+import 'package:flutter_instaclone/servise/data_servise.dart';
+import 'package:flutter_instaclone/servise/utilis_servise.dart';
 class LikesPage extends StatefulWidget {
   const LikesPage({Key? key}) : super(key: key);
 
@@ -11,18 +13,53 @@ class LikesPage extends StatefulWidget {
 
 class _LikesPageState extends State<LikesPage> {
   @override
-
+  bool isLoading=true;
   List<Post> itms=[];
 
-  String post_img1='https://firebasestorage.googleapis.com/v0/b/fire-post-d2cb9.appspot.com/o/post_images%2Fimage_2022-01-09%2008%3A05%3A38.932848?alt=media&token=422c6751-a71b-4099-b2f3-55';
-  String post_img2='https://firebasestorage.googleapis.com/v0/b/fire-post-d2cb9.appspot.com/o/post_images%2Fimage_2022-01-09%2008%3A07%3A21.954007?alt=media&token=abbf240f-1430-401e-a737-9a922414b2b4';
+  void _apiLoadLikes(){
+    setState(() {
+      isLoading=true;
+    });
+    DataServise.loadLikes().then((value) => {
+      _resLoadLikes(value),
+    });
+  }
+
+  void _apiPostUnLike(Post post) async {
+    setState(() {
+      isLoading = true;
+      post.liked = false;
+    });
+    await DataServise.likePost(post, false).then((value) => {
+      _apiLoadLikes(),
+    });
+  }
+
+  void  _resLoadLikes(List<Post> post){
+    setState(() {
+      itms=post;
+      isLoading=false;
+    });
+  }
+
+  _actionRemovePosts(Post post)async{
+    var result=await Utils.dialogCommon(context, "Insta Clone", "Do you  want to remove this post?", false);
+    if(result!=null&&result){
+      setState(() {
+        isLoading=true;
+      });
+      DataServise.removePost(post).then((value) =>{
+        _apiLoadLikes(),
+      });
+    }
+  }
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    itms.add(Post(postImage:post_img1,caption:"Discover more great images on our sponsor's site"));
-    itms.add(Post(postImage:post_img2,caption:"Discover more great images on our sponsor's site"));
+    _apiLoadLikes();
   }
   @override
   Widget build(BuildContext context) {
@@ -35,11 +72,23 @@ class _LikesPageState extends State<LikesPage> {
         title:const Text('Likes',style:TextStyle(color:Colors.black,fontSize:30,fontFamily:'Billabong')),
 
       ),
-      body:ListView.builder(
-          itemCount:itms.length,
-          itemBuilder:(ctx,x){
-            return _itemOf(itms[x]);
-          }
+      body:Stack(
+        children: [
+          itms.length > 0?
+          ListView.builder(
+              itemCount:itms.length,
+              itemBuilder:(ctx,x){
+                return _itemOf(itms[x]);
+              }
+          ):const Center(
+            child:Text("No liked posts",style:TextStyle(fontSize:20,color:Colors.black87,fontWeight:FontWeight.bold),),
+          ),
+
+          isLoading ?
+          const Center(
+            child: CircularProgressIndicator(),
+          ): const SizedBox.shrink(),
+        ],
       ),
     );
   }
@@ -48,10 +97,10 @@ class _LikesPageState extends State<LikesPage> {
       color:Colors.white,
       child:Column(
         children: [
-          Divider(),
+          const Divider(),
           //*userInfo
           Container(
-            padding:EdgeInsets.symmetric(horizontal:10,vertical:10),
+            padding:const EdgeInsets.symmetric(horizontal:10,vertical:10),
             child:Row(
               mainAxisAlignment:MainAxisAlignment.spaceBetween,
               children: [
@@ -69,26 +118,31 @@ class _LikesPageState extends State<LikesPage> {
                     const SizedBox(width:10,),
                     Column(
                       crossAxisAlignment:CrossAxisAlignment.start,
-                      children: const [
-                        Text("Username",style:TextStyle(color:Colors.black,fontWeight:FontWeight.bold),),
-                        Text("February 2, 2020",style:TextStyle(color:Colors.black,fontWeight:FontWeight.normal),),
+                      children: [
+                        Text(post.fullname,style:const TextStyle(color:Colors.black,fontWeight:FontWeight.bold),),
+                        Text(post.date,style:const TextStyle(color:Colors.black,fontWeight:FontWeight.normal),),
                       ],
                     ),
                   ],
-                ),
+                ),post.mine?
                 IconButton(
-                  onPressed:(){},
+                  onPressed:(){
+                    _actionRemovePosts(post);
+                  },
                   icon:const Icon(SimpleLineIcons.options),
-                ),
+                ):const SizedBox.shrink(),
               ],
             ),
           ),
           //*image
           //Image.network(post.postImage,fit:BoxFit.cover,),
           CachedNetworkImage(
-            imageUrl:post.postImage,
-            placeholder: (context, url) => CircularProgressIndicator(),
-            errorWidget: (context, url, error) => Icon(Icons.error),
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.width,
+            imageUrl:post.img_post,
+            placeholder: (context, url) => const CircularProgressIndicator(),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
+            fit:BoxFit.cover,
           ),
           //*likeshere
           Row(
@@ -97,12 +151,18 @@ class _LikesPageState extends State<LikesPage> {
               Row(
                 children: [
                   IconButton(
-                    onPressed:(){},
-                    icon:Icon(FontAwesome.heart,color:Colors.red,),
+                    onPressed:(){
+                      if(post.liked){
+                        _apiPostUnLike(post);
+                      }
+                    },
+                    icon:post.liked?
+                    const Icon(FontAwesome.heart,color:Colors.red,):
+                        const Icon(FontAwesome.heart_o),
                   ),
                   IconButton(
                     onPressed:(){},
-                    icon:Icon(FontAwesome.send),
+                    icon:const Icon(Icons.share),
                   )
                 ],
               ),
@@ -111,7 +171,7 @@ class _LikesPageState extends State<LikesPage> {
 
           Container(
             width:MediaQuery.of(context).size.width,
-            margin:EdgeInsets.only(left:10,right:10,bottom:10),
+            margin:const EdgeInsets.only(left:10,right:10,bottom:10),
             child:RichText(
               softWrap:true,
               overflow:TextOverflow.visible,

@@ -76,7 +76,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       body:SingleChildScrollView(
         child:Container(
-          padding:EdgeInsets.all(20),
+          padding:const EdgeInsets.all(20),
           height:MediaQuery.of(context).size.height,
           decoration:const BoxDecoration(
             gradient:LinearGradient(
@@ -97,12 +97,12 @@ class _SignUpPageState extends State<SignUpPage> {
                     child:Column(
                       mainAxisAlignment:MainAxisAlignment.center,
                       children: [
-                        Text("Instagram",style:TextStyle(color:Colors.white,fontSize:45,fontFamily:'Billabong'),),
-                        SizedBox(height:20,),
+                        const Text("Instagram",style:TextStyle(color:Colors.white,fontSize:45,fontFamily:'Billabong'),),
+                        const SizedBox(height:20,),
                         //#fulname
                         Container(
                           height:50,
-                          padding:EdgeInsets.only(right:10,left:10),
+                          padding:const EdgeInsets.only(right:10,left:10),
                           decoration:BoxDecoration(
                             color:Colors.white54.withOpacity(0.2),
                             borderRadius:BorderRadius.circular(7),
@@ -117,11 +117,11 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height:10,),
+                        const SizedBox(height:10,),
                         //#email
                         Container(
                           height:50,
-                          padding:EdgeInsets.only(right:10,left:10),
+                          padding:const EdgeInsets.only(right:10,left:10),
                           decoration:BoxDecoration(
                             color:Colors.white54.withOpacity(0.2),
                             borderRadius:BorderRadius.circular(7),
@@ -136,16 +136,17 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height:10,),
+                        const SizedBox(height:10,),
                         //#password
                         Container(
                           height:50,
-                          padding:EdgeInsets.only(right:10,left:10),
+                          padding:const EdgeInsets.only(right:10,left:10),
                           decoration:BoxDecoration(
                             color:Colors.white54.withOpacity(0.2),
                             borderRadius:BorderRadius.circular(7),
                           ),
                           child: TextField(
+                            obscureText:true,
                             controller:passwordcontroler,
                             style:const TextStyle(color:Colors.white),
                             decoration:const InputDecoration(
@@ -155,16 +156,17 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height:10,),
+                        const SizedBox(height:10,),
                         //Conforn password
                         Container(
                           height:50,
-                          padding:EdgeInsets.only(right:10,left:10),
+                          padding:const EdgeInsets.only(right:10,left:10),
                           decoration:BoxDecoration(
                             color:Colors.white54.withOpacity(0.2),
                             borderRadius:BorderRadius.circular(7),
                           ),
                           child: TextField(
+                            obscureText:true,
                             controller:confirmpasswordcontroler,
                             style:const TextStyle(color:Colors.white),
                             decoration:const InputDecoration(
@@ -182,7 +184,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           },
                           child:Container(
                             height:50,
-                            padding:EdgeInsets.only(left:10,right: 10),
+                            padding:const EdgeInsets.only(left:10,right: 10),
                             decoration:BoxDecoration(
                               border:Border.all(color:Colors.white54.withOpacity(0.2),width:2),
                               borderRadius:BorderRadius.circular(7),
@@ -216,7 +218,7 @@ class _SignUpPageState extends State<SignUpPage> {
               isLoading ?
               const Center(
                 child: CircularProgressIndicator(),
-              ): SizedBox.shrink(),
+              ): const SizedBox.shrink(),
             ],
           ),
         ),
